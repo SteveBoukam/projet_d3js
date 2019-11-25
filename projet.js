@@ -60,15 +60,28 @@ d3.json("https://data.cityofnewyork.us/resource/nc67-uf89.json",function(error,d
     }
     return tabViolenceOccurence;
   }
+  var testo = test();
+ 
+  x.domain(testo.map(function(d){
+
+  }))
+  for(var i= 0; i < test().length; i++)
+{
+  x.domain(test().map(function(d) { 
+     return d.count; }));
+   y.domain([0, d3.max(data, function(d) { 
+     return d.reduction_amount; })]);
+}
   for(var valeur in test()){
-    console.log(test()[valeur])
+    
+    console.log(valeur)
+     console.log(test()[valeur])
      x.domain(valeur);
     // y.domain(0, d3.max(test()[valeur]));
   }
-  console.log(test())
+  //console.log(test())
   /*
   x.domain(data.map(function(d) { 
-   // console.log(data)
     return d.state; }));
   y.domain([0, d3.max(data, function(d) { 
     return d.reduction_amount; })]);
@@ -134,6 +147,6 @@ d3.tsv("data.tsv", type, function(error, data) {
 });
 */
 function type(d) {
-  d.frequency = +d.penalty_amount;
+  d.frequency = +d.frequency;
   return d;
 }
