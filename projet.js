@@ -1,9 +1,7 @@
 
-var margin = {top: 40, right: 20, bottom: 30, left: 40},
+var margin = {top: 40, right: 20, bottom:200, left: 40},
     width = 960 - margin.left - margin.right,
     height = 960 - margin.top - margin.bottom;
-
-//var formatPercent = d3.format(".0%");
 
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
@@ -18,22 +16,12 @@ var xAxis = d3.svg.axis()
 var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left");
-   // .tickFormat(formatPercent);
-
-var tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([-10, 0])
-  .html(function(d) {
-    return "<strong>Frequency:</strong> <span style='color:red'>" + d.reduction_amount + "</span>";
-  })
 
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-svg.call(tip);
 
 d3.json("https://data.cityofnewyork.us/resource/nc67-uf89.json",function(error,data){
 
@@ -48,7 +36,7 @@ d3.json("https://data.cityofnewyork.us/resource/nc67-uf89.json",function(error,d
   }
   // on crée un tableau contenant une violation et le nombre d'occurence de celle-ci
   let test = () =>{
-    var tabViolenceOccurence = new Array();
+    var tabViolenceOccurence = [];
   for (let violation of listeViolations()){
     var count = 0;
     data.forEach(element => {
@@ -61,36 +49,19 @@ d3.json("https://data.cityofnewyork.us/resource/nc67-uf89.json",function(error,d
     return tabViolenceOccurence;
   }
   var testo = test();
- 
-  x.domain(testo.map(function(d){
 
-  }))
-  for(var i= 0; i < test().length; i++)
-{
-  x.domain(test().map(function(d) { 
-     return d.count; }));
-   y.domain([0, d3.max(data, function(d) { 
-     return d.reduction_amount; })]);
-}
-  for(var valeur in test()){
-    
-    console.log(valeur)
-     console.log(test()[valeur])
-     x.domain(valeur);
-    // y.domain(0, d3.max(test()[valeur]));
-  }
-  //console.log(test())
-  /*
-  x.domain(data.map(function(d) { 
-    return d.state; }));
-  y.domain([0, d3.max(data, function(d) { 
-    return d.reduction_amount; })]);
-  */
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+  var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Occurence:</strong> <span style='color:red'>" + testo[d] + "</span>";
+  })
 
+  svg.call(tip);
+  
+  x.domain(Object.keys(testo).map(function(key){ return key; }));
+  y.domain([0, d3.max(Object.keys(testo), function(key){ return testo[key]; })]);
+   
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
@@ -98,54 +69,33 @@ d3.json("https://data.cityofnewyork.us/resource/nc67-uf89.json",function(error,d
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Frequency");
+      .style("text-anchor", "end");
+      //.text("Occurence");
+
+  svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis)
+  .selectAll("text")
+    .attr("y", 0)
+    .attr("x", 9)
+    .attr("dy", ".71em")
+    .attr("transform", "rotate(60)")
+    .style("text-anchor", "start");
 
   svg.selectAll(".bar")
-      .data(data)
+      .data(Object.keys(testo))
     .enter().append("rect")
       .attr("class", "bar")
-      .attr("x", function(d) { return x(d.state); })
+      .attr("x", function(key){ return x(key); })
       .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.penalty_amount); })
-      .attr("height", function(d) { return height - y(d.penalty_amount); })
+      .attr("y", function(key){ return y(testo[key]); })
+      .attr("height", function(key){return height - y(testo[key]);})
       .on('mouseover', tip.show)
       .on('mouseout', tip.hide)
 
 });
-/*
-d3.tsv("data.tsv", type, function(error, data) {
-  x.domain(data.map(function(d) { return d.letter; }));
-  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
 
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Frequency");
-
-  svg.selectAll(".bar")
-      .data(data)
-    .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.letter); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.frequency); })
-      .attr("height", function(d) { return height - y(d.frequency); })
-      .on('mouseover', tip.show)
-      .on('mouseout', tip.hide)
-
-});
-*/
 function type(d) {
   d.frequency = +d.frequency;
   return d;

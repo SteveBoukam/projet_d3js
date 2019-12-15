@@ -49,3 +49,7 @@ body {
   top: 100%;
   left: 0;
 }
+
+svg{
+  overflow: none !important;
+}
